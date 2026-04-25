@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-02-07",
+  "anomaly_threshold": 0.00024931563675636276,
+  "percentile": 99.5,
+  "previous_threshold": 0.000134,
+  "previous_percentile": 95.0,
+  "validation_samples": 9991,
+  "hidden_size": 32,
+  "window_size": 10,
+  "rationale": "Recalibrated from 95th to 99.5th percentile to reduce false positive rate",
+  "expected_fpr_on_validation": 0.005004504053648284,
+  "validation_error_stats": {
+    "mean": 8.025145507417619e-05,
+    "std": 3.107302472926676e-05,
+    "min": 2.445960490149446e-05,
+    "max": 0.00046840219874866307,
+    "median": 7.483107765438035e-05
+  },
+  "performance_improvement": {
+    "dataset_2": {
+      "baseline_fpr": 0.9781931464174455,
+      "new_fpr": 0.6012461059190031,
+      "fpr_reduction_pct": 37.69470404984424,
+      "baseline_recall": 0.9932781799379524,
+      "new_recall": 0.8474663908996898,
+      "recall_change_pct": -14.581178903826263
+    },
+    "dataset_3": {
+      "baseline_recall": 1.0,
+      "new_recall": 0.9996955551045261,
+      "recall_maintained": true
+    }
+  }
+}

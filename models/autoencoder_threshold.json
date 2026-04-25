@@ -1,0 +1,10 @@
+{
+    "timestamp": "2026-02-07 13:17:29",
+    "anomaly_threshold": 0.00013352074602153148,
+    "percentile": 95,
+    "training_samples": 7992,
+    "validation_samples": 1999,
+    "hidden_size": 32,
+    "window_size": 10,
+    "note": "Threshold is 95th percentile of validation reconstruction errors"
+}

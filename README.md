@@ -445,12 +445,6 @@ This project is for academic and research purposes.
 
 ---
 
-## 📧 Contact
 
-For questions or collaboration:
-- Email: your.email@example.com
-- GitHub: [@yourusername](https://github.com/yourusername)
-
----
 
 **Happy Researching! 🚁🔒**

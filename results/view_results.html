@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UAV IDS - All Results</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .summary h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card .number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-card .label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .graph-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
+        .graph-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .graph-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        
+        .graph-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+        
+        .graph-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+        }
+        
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 95%;
+            max-height: 95%;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin: 10px 10px 0 0;
+            transition: background 0.3s;
+        }
+        
+        .download-btn:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 UAV IDS - All Results Visualization</h1>
+        <p class="subtitle">Comprehensive view of all training, evaluation, and analysis results</p>
+        
+        <div class="summary">
+            <h2>📊 Results Summary</h2>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="number">15</div>
+                    <div class="label">📈 Graphs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">8</div>
+                    <div class="label">📋 JSON Reports</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">7</div>
+                    <div class="label">📊 CSV Files</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">98.7%</div>
+                    <div class="label">✅ Best Accuracy</div>
+                </div>
+            </div>
+            <div style="margin-top: 20px;">
+                <a href="all_results_summary.pdf" class="download-btn" download>📥 Download All Graphs (PDF)</a>
+            </div>
+        </div>
+        
+        <!-- Training Results -->
+        <div class="section">
+            <h2>🎯 Training Results</h2>
+            <div class="graph-grid">
+                <div class="graph-card">
+                    <h3>Training History</h3>
+                    <img src="training_history.png" alt="Training History" onclick="openModal(this.src)">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Threshold Analysis -->
+        <div class="section">
+            <h2>⚖️ Threshold Analysis</h2>
+            <div class="graph-grid">
+                <div class="graph-card">
+                    <h3>Threshold Recalibration Comparison</h3>
+                    <img src="threshold_recalibration_comparison.png" alt="Threshold Comparison" onclick="openModal(this.src)">
+                </div>
+                <div class="graph-card">
+                    <h3>Threshold Distributions</h3>
+                    <img src="threshold_recalibration_distributions.png" alt="Threshold Distributions" onclick="openModal(this.src)">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Temporal Filtering - Dataset 2 -->
+        <div class="section">
+            <h2>📊 Temporal Filtering - Dataset 2 (Injection/Replay)</h2>
+            <div class="graph-grid">
+                <div class="graph-card">
+                    <h3>Classifier Performance</h3>
+                    <img src="temporal_filtering_dataset-2_classifier.png" alt="Dataset 2 Classifier" onclick="openModal(this.src)">
+                </div>
+                <div class="graph-card">
+                    <h3>Autoencoder Performance</h3>
+                    <img src="temporal_filtering_dataset-2_autoencoder.png" alt="Dataset 2 Autoencoder" onclick="openModal(this.src)">
+                </div>
+                <div class="graph-card">
+                    <h3>Ensemble Performance</h3>
+                    <img src="temporal_filtering_dataset-2_ensemble.png" alt="Dataset 2 Ensemble" onclick="openModal(this.src)">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Temporal Filtering - Dataset 3 -->
+        <div class="section">
+            <h2>📊 Temporal Filtering - Dataset 3 (GPS Spoofing)</h2>
+            <div class="graph-grid">
+                <div class="graph-card">
+                    <h3>Classifier Performance</h3>
+                    <img src="temporal_filtering_dataset-3_classifier.png" alt="Dataset 3 Classifier" onclick="openModal(this.src)">
+                </div>
+                <div class="graph-card">
+                    <h3>Autoencoder Performance</h3>
+                    <img src="temporal_filtering_dataset-3_autoencoder.png" alt="Dataset 3 Autoencoder" onclick="openModal(this.src)">
+                </div>
+                <div class="graph-card">
+                    <h3>Ensemble Performance</h3>
+                    <img src="temporal_filtering_dataset-3_ensemble.png" alt="Dataset 3 Ensemble" onclick="openModal(this.src)">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Timeline Analysis - Dataset 2 -->
+        <div class="section">
+            <h2>⏱️ Timeline Analysis - Dataset 2</h2>
+            <div class="graph-grid">
+                <div class="graph-card">
+                    <h3>Ensemble N=1 (No Filtering)</h3>
+                    <img src="temporal_filtering_timeline_dataset-2_ensemble_N1.png" alt="Dataset 2 N1" onclick="openModal(this.src)">
+                </div>
+                <div class="graph-card">
+                    <h3>Ensemble N=3 (3 Consecutive)</h3>
+                    <img src="temporal_filtering_timeline_dataset-2_ensemble_N3.png" alt="Dataset 2 N3" onclick="openModal(this.src)">
+                </div>
+                <div class="graph-card">
+                    <h3>Ensemble N=5 (5 Consecutive)</h3>
+                    <img src="temporal_filtering_timeline_dataset-2_ensemble_N5.png" alt="Dataset 2 N5" onclick="openModal(this.src)">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Timeline Analysis - Dataset 3 -->
+        <div class="section">
+            <h2>⏱️ Timeline Analysis - Dataset 3</h2>
+            <div class="graph-grid">
+                <div class="graph-card">
+                    <h3>Ensemble N=1 (No Filtering)</h3>
+                    <img src="temporal_filtering_timeline_dataset-3_ensemble_N1.png" alt="Dataset 3 N1" onclick="openModal(this.src)">
+                </div>
+                <div class="graph-card">
+                    <h3>Ensemble N=3 (3 Consecutive)</h3>
+                    <img src="temporal_filtering_timeline_dataset-3_ensemble_N3.png" alt="Dataset 3 N3" onclick="openModal(this.src)">
+                </div>
+                <div class="graph-card">
+                    <h3>Ensemble N=5 (5 Consecutive)</h3>
+                    <img src="temporal_filtering_timeline_dataset-3_ensemble_N5.png" alt="Dataset 3 N5" onclick="openModal(this.src)">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for full-size image viewing -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+    
+    <script>
+        function openModal(src) {
+            document.getElementById('imageModal').style.display = 'block';
+            document.getElementById('modalImage').src = src;
+        }
+        
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+        
+        // Close modal on Esc key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

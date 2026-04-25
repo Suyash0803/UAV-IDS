@@ -315,6 +315,168 @@ def load_model(model, path='../models/lstm_ids.pth', device='cpu'):
     return model
 
 
+class LSTM_Autoencoder(nn.Module):
+    """
+    LSTM Autoencoder for Unsupervised Anomaly Detection
+    
+    WHY AUTOENCODERS FOR ZERO-DAY ATTACKS?
+    =======================================
+    Traditional classifiers (like LSTM_IDS) are trained on labeled attack samples.
+    They struggle with zero-day attacks because they've never seen those patterns.
+    
+    Autoencoders solve this by:
+    1. Training ONLY on normal data (unsupervised learning)
+    2. Learning to reconstruct normal telemetry patterns
+    3. High reconstruction error = anomaly = potential attack
+    4. Detects ANY deviation from normal, including unknown attacks
+    
+    Architecture:
+    Input → Encoder (LSTM) → Latent Representation → Decoder (LSTM) → Reconstructed Output
+    
+    Key Insight:
+    - Normal data: Low reconstruction error (model learned these patterns)
+    - Attack data: High reconstruction error (unfamiliar patterns)
+    - GPS spoofing: Sudden jumps deviate from smooth normal trajectories
+    
+    Advantages over supervised models:
+    - No attack labels needed
+    - Detects novel/zero-day attacks
+    - Complements supervised classifier
+    """
+    
+    def __init__(self, input_size, hidden_size=32, num_layers=1, dropout=0.2):
+        """
+        Initialize LSTM Autoencoder
+        
+        Args:
+            input_size: Number of features per timestep (9 for UAV telemetry)
+            hidden_size: Size of latent representation (compressed encoding)
+                        Smaller = more compression = better anomaly detection
+                        32 is good balance between compression and reconstruction
+            num_layers: Number of LSTM layers in encoder/decoder
+                       1 layer is sufficient for autoencoders (simpler patterns)
+            dropout: Dropout rate (less than classifier since we want exact reconstruction)
+        """
+        super(LSTM_Autoencoder, self).__init__()
+        
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        
+        # Encoder: Compresses input sequence into latent representation
+        # Takes: (batch, seq_len, input_size) → (batch, seq_len, hidden_size)
+        self.encoder = nn.LSTM(
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            batch_first=True,
+            dropout=dropout if num_layers > 1 else 0,
+            bidirectional=False  # Unidirectional for autoencoder (reduces params)
+        )
+        
+        # Decoder: Reconstructs original sequence from latent representation
+        # Takes: (batch, seq_len, hidden_size) → (batch, seq_len, input_size)
+        self.decoder = nn.LSTM(
+            input_size=hidden_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            batch_first=True,
+            dropout=dropout if num_layers > 1 else 0,
+            bidirectional=False
+        )
+        
+        # Output layer: Maps decoder output back to original feature space
+        self.output_layer = nn.Linear(hidden_size, input_size)
+        
+    def forward(self, x):
+        """
+        Forward pass: Encode then decode
+        
+        Args:
+            x: Input sequences (batch_size, window_size, input_size)
+            
+        Returns:
+            reconstructed: Reconstructed sequences (same shape as input)
+        """
+        batch_size, seq_len, _ = x.size()
+        
+        # Encoder: Compress input into latent representation
+        # encoded: (batch, seq_len, hidden_size)
+        # h_n: Final hidden state (num_layers, batch, hidden_size)
+        # c_n: Final cell state (num_layers, batch, hidden_size)
+        encoded, (h_n, c_n) = self.encoder(x)
+        
+        # Decoder: Reconstruct from latent representation
+        # Use encoder's final states to initialize decoder
+        decoded, _ = self.decoder(encoded, (h_n, c_n))
+        
+        # Map back to original feature space
+        # reconstructed: (batch, seq_len, input_size)
+        reconstructed = self.output_layer(decoded)
+        
+        return reconstructed
+    
+    def get_reconstruction_error(self, x):
+        """
+        Compute reconstruction error (anomaly score)
+        
+        Args:
+            x: Input sequences (batch_size, window_size, input_size)
+            
+        Returns:
+            errors: MSE reconstruction error per sample (batch_size,)
+        """
+        self.eval()
+        with torch.no_grad():
+            reconstructed = self.forward(x)
+            # Mean squared error per sample (averaged over time and features)
+            errors = torch.mean((x - reconstructed) ** 2, dim=(1, 2))
+        return errors
+
+
+def create_autoencoder(input_size, hidden_size=32, num_layers=1, dropout=0.2, device='cpu'):
+    """
+    Factory function to create LSTM Autoencoder
+    
+    Args:
+        input_size: Number of features (9 for UAV)
+        hidden_size: Latent dimension size (default 32)
+        num_layers: Number of LSTM layers (default 1)
+        dropout: Dropout rate (default 0.2)
+        device: 'cpu' or 'cuda'
+        
+    Returns:
+        model: LSTM_Autoencoder instance
+    """
+    model = LSTM_Autoencoder(
+        input_size=input_size,
+        hidden_size=hidden_size,
+        num_layers=num_layers,
+        dropout=dropout
+    ).to(device)
+    
+    # Count parameters
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    
+    print("="*70)
+    print("LSTM Autoencoder Architecture")
+    print("="*70)
+    print(f"Model type: LSTM Autoencoder (Unsupervised)")
+    print(f"Input size: {input_size} features")
+    print(f"Hidden size: {hidden_size} (latent dimension)")
+    print(f"Number of layers: {num_layers}")
+    print(f"Dropout rate: {dropout}")
+    print(f"Device: {device}")
+    print(f"\nModel structure:")
+    print(model)
+    print(f"\nTotal parameters: {total_params:,}")
+    print(f"Trainable parameters: {trainable_params:,}")
+    print("="*70)
+    
+    return model
+
+
 def main():
     """Example model creation"""
     print("UAV LSTM IDS Model Example\n")
@@ -323,7 +485,8 @@ def main():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print(f"Using device: {device}\n")
     
-    # Create standard model
+    # Create standard classifier
+    print("\n1. Creating LSTM Classifier:")
     model = create_model(
         input_size=9,
         hidden_size=64,
@@ -333,8 +496,8 @@ def main():
         device=device
     )
     
-    # Test with dummy input
-    print("Testing model with dummy input...")
+    # Test classifier
+    print("\nTesting classifier with dummy input...")
     batch_size = 32
     window_size = 10
     n_features = 9
@@ -345,7 +508,29 @@ def main():
     print(f"Input shape: {dummy_input.shape}")
     print(f"Output shape: {output.shape}")
     print(f"Output range: [{output.min().item():.4f}, {output.max().item():.4f}]")
-    print("\n✓ Model test successful!")
+    
+    # Create autoencoder
+    print("\n\n2. Creating LSTM Autoencoder:")
+    autoencoder = create_autoencoder(
+        input_size=9,
+        hidden_size=32,
+        num_layers=1,
+        dropout=0.2,
+        device=device
+    )
+    
+    # Test autoencoder
+    print("\nTesting autoencoder with dummy input...")
+    reconstructed = autoencoder(dummy_input)
+    errors = autoencoder.get_reconstruction_error(dummy_input)
+    
+    print(f"Input shape: {dummy_input.shape}")
+    print(f"Reconstructed shape: {reconstructed.shape}")
+    print(f"Reconstruction errors shape: {errors.shape}")
+    print(f"Mean reconstruction error: {errors.mean().item():.6f}")
+    print(f"Error range: [{errors.min().item():.6f}, {errors.max().item():.6f}]")
+    
+    print("\n✓ Model tests successful!")
 
 
 if __name__ == "__main__":
